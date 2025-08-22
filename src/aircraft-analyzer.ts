@@ -70,28 +70,27 @@ export class AircraftAnalyzer {
             position.latitude > CENTRAL_MED_BOUNDS.maxLat ||
             position.longitude < CENTRAL_MED_BOUNDS.minLon ||
             position.longitude > CENTRAL_MED_BOUNDS.maxLon) {
-        return false;
+            return false;
         }
-        
+
         // If inside bounding box, check polygon precisely
         return this.isPointInPolygon(position.latitude, position.longitude);
     }
-
     private static isPointInPolygon(lat: number, lon: number): boolean {
         let inside = false;
-        
+
         for (let i = 0, j = CENTRAL_MED_POLYGON.length - 1; i < CENTRAL_MED_POLYGON.length; j = i++) {
-        const [xi, yi] = CENTRAL_MED_POLYGON[i];
-        const [xj, yj] = CENTRAL_MED_POLYGON[j];
-        
-        if (((yi > lon) !== (yj > lon)) && (lat < (xj - xi) * (lon - yi) / (yj - yi) + xi)) {
-            inside = !inside;
+            const [yi, xi] = CENTRAL_MED_POLYGON[i]; // [lat, lon]
+            const [yj, xj] = CENTRAL_MED_POLYGON[j];
+
+            if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) {
+                inside = !inside;
+            }
         }
-        }
-        
+
         return inside;
     }
-  
+
     private static isInTargetAltitude(altitude: number): boolean {
         return altitude >= MONITORING_THRESHOLDS.altitude.min &&
             altitude <= MONITORING_THRESHOLDS.altitude.max;

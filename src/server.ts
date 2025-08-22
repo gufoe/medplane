@@ -1,6 +1,6 @@
 import express from 'express';
 import path from 'path';
-import { MONITORING_THRESHOLDS, SICILY_CHANNEL_BOUNDS } from './config';
+import { MONITORING_THRESHOLDS, CENTRAL_MED_BOUNDS, CENTRAL_MED_POLYGON } from './config';
 import { AircraftScanner } from './scanner';
 import { logger } from './logger';
 
@@ -29,7 +29,10 @@ export class WebServer {
             }
             res.json({
                 aircraft: this.scanner.getAircraft(),
-                monitoringArea: SICILY_CHANNEL_BOUNDS
+                monitoringArea: {
+                    bounds: CENTRAL_MED_BOUNDS,
+                    polygon: CENTRAL_MED_POLYGON
+                }
             });
         });
 
@@ -75,7 +78,10 @@ export class WebServer {
         // API endpoint for map configuration
         this.app.get('/api/map', (_, res) => {
             res.json({
-                monitoringArea: SICILY_CHANNEL_BOUNDS,
+                monitoringArea: {
+                    bounds: CENTRAL_MED_BOUNDS,
+                    polygon: CENTRAL_MED_POLYGON
+                },
                 thresholds: MONITORING_THRESHOLDS
             });
         });

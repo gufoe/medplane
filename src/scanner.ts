@@ -2,7 +2,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { AircraftAnalyzer } from './aircraft-analyzer';
-import { SICILY_CHANNEL_BOUNDS } from './config';
+import { CENTRAL_MED_BOUNDS } from './config';
 import { logger } from './logger';
 import { TelegramNotifier } from './notifications/telegram-notifier';
 import { ScannerProvider } from './providers/base-provider';
@@ -121,7 +121,7 @@ export class AircraftScanner {
     }
 
     private async scan(): Promise<void> {
-        const result = await this.provider.scan(SICILY_CHANNEL_BOUNDS);
+        const result = await this.provider.scan(CENTRAL_MED_BOUNDS);
 
         // Update aircraft data and check for interesting patterns
         result.aircraft.forEach(scanAc => {

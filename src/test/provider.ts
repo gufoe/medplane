@@ -1,5 +1,5 @@
 import { AdsbFiProvider } from '../providers/adsbfi-provider';
-import { SICILY_CHANNEL_BOUNDS } from '../config';
+import { CENTRAL_MED_BOUNDS } from '../config';
 import { logger } from '../logger';
 
 export async function runProviderTest(): Promise<void> {
@@ -9,7 +9,7 @@ export async function runProviderTest(): Promise<void> {
         const provider = AdsbFiProvider.fromEnv();
         logger.debug('\nInitiating API call...');
 
-        const result = await provider.scan(SICILY_CHANNEL_BOUNDS);
+        const result = await provider.scan(CENTRAL_MED_BOUNDS);
         logger.debug('\nAPI call completed successfully.');
         logger.debug('\nAircraft Data:');
         logger.debug('Timestamp:', new Date(result.timestamp * 1000).toISOString());

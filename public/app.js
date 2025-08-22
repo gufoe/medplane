@@ -145,15 +145,29 @@ function updateAircraft(data) {
         if (monitoringAreaRect) {
             monitoringAreaRect.remove();
         }
-        monitoringAreaRect = L.rectangle([
-            [monitoringArea.minLat, monitoringArea.minLon], // Southwest corner
-            [monitoringArea.maxLat, monitoringArea.maxLon]  // Northeast corner
-        ], {
-            color: 'red',
-            weight: 2,
-            fillColor: 'red',
-            fillOpacity: 0.1
-        }).addTo(map);
+        
+        // Check if we have the new polygon format or old bounds format
+        if (monitoringArea.polygon) {
+            // New polygon format
+            monitoringAreaRect = L.polygon(monitoringArea.polygon, {
+                color: 'red',
+                weight: 2,
+                fillColor: 'red',
+                fillOpacity: 0.1
+            }).addTo(map);
+        } else {
+            // Fallback to old rectangle format (for backward compatibility)
+            monitoringAreaRect = L.rectangle([
+                [monitoringArea.minLat, monitoringArea.minLon],
+                [monitoringArea.maxLat, monitoringArea.maxLon]
+            ], {
+                color: 'red',
+                weight: 2,
+                fillColor: 'red',
+                fillOpacity: 0.1
+            }).addTo(map);
+        }
+        
         if (!hasFitToMonitoringArea) {
             map.fitBounds(monitoringAreaRect.getBounds());
             hasFitToMonitoringArea = true;

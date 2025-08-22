@@ -1,4 +1,4 @@
-import { MONITORING_THRESHOLDS, SICILY_CHANNEL_BOUNDS } from './config';
+import { MONITORING_THRESHOLDS, CENTRAL_MED_POLYGON, CENTRAL_MED_BOUNDS } from './config';
 import { Aircraft, Position, ExtendedPosition } from './types';
 import { areIntersecting, GeoUtils } from './utils';
 
@@ -21,7 +21,7 @@ export class AircraftAnalyzer {
      * @returns Object with is_monitored status and reason
      */
     private static checkMonitoringRequirements(position: ExtendedPosition): { is_monitored: boolean; not_monitored_reason: string | null } {
-        const inArea = AircraftAnalyzer.isInSicilyChannel(position);
+        const inArea = AircraftAnalyzer.isInGeoBounds(position);
         const inAltitudeRange = AircraftAnalyzer.isInTargetAltitude(position.altitude);
         const inSpeedRange = AircraftAnalyzer.isInTargetSpeed(position.speed);
         const overSea = position.distanceToCoast > MONITORING_THRESHOLDS.coast.minDistance;
@@ -64,13 +64,34 @@ export class AircraftAnalyzer {
     }
 
 
-    private static isInSicilyChannel(position: Position): boolean {
-        return position.latitude >= SICILY_CHANNEL_BOUNDS.minLat &&
-            position.latitude <= SICILY_CHANNEL_BOUNDS.maxLat &&
-            position.longitude >= SICILY_CHANNEL_BOUNDS.minLon &&
-            position.longitude <= SICILY_CHANNEL_BOUNDS.maxLon;
+    private static isInGeoBounds(position: Position): boolean {
+        // Fast bounding box check first
+        if (position.latitude < CENTRAL_MED_BOUNDS.minLat ||
+            position.latitude > CENTRAL_MED_BOUNDS.maxLat ||
+            position.longitude < CENTRAL_MED_BOUNDS.minLon ||
+            position.longitude > CENTRAL_MED_BOUNDS.maxLon) {
+        return false;
+        }
+        
+        // If inside bounding box, check polygon precisely
+        return this.isPointInPolygon(position.latitude, position.longitude);
     }
 
+    private static isPointInPolygon(lat: number, lon: number): boolean {
+        let inside = false;
+        
+        for (let i = 0, j = CENTRAL_MED_POLYGON.length - 1; i < CENTRAL_MED_POLYGON.length; j = i++) {
+        const [xi, yi] = CENTRAL_MED_POLYGON[i];
+        const [xj, yj] = CENTRAL_MED_POLYGON[j];
+        
+        if (((yi > lon) !== (yj > lon)) && (lat < (xj - xi) * (lon - yi) / (yj - yi) + xi)) {
+            inside = !inside;
+        }
+        }
+        
+        return inside;
+    }
+  
     private static isInTargetAltitude(altitude: number): boolean {
         return altitude >= MONITORING_THRESHOLDS.altitude.min &&
             altitude <= MONITORING_THRESHOLDS.altitude.max;
